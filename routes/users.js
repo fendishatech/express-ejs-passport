@@ -1,4 +1,12 @@
 const router = require("express").Router();
+const User = require("../models/user.model");
+const bcrypt = require("bcrypt");
+
+const saltRounds = 10;
+
+function hashPassword(password) {
+  return bcrypt.hashSync(password, saltRounds);
+}
 
 router.get("/login", (req, res) => {
   res.render("login");
@@ -13,13 +21,13 @@ router.post("/login", (req, res) => {
   res.render("login");
 });
 
-router.post("/register", (req, res) => {
-  const { name, email, password, password2 } = req.body;
+router.post("/register", async (req, res) => {
+  const { first_name, last_name, username, password, password2 } = req.body;
 
   let errors = [];
 
   // validations
-  if (!name || !email || !password || !password2) {
+  if (!first_name || !last_name || !username || !password || !password2) {
     errors.push({ msg: "all feilds are required and can not be empty!" });
   }
 
@@ -35,13 +43,36 @@ router.post("/register", (req, res) => {
   if (errors.length > 0) {
     res.render("register", {
       errors,
-      name,
-      email,
+      first_name,
+      last_name,
+      username,
       password,
       password2,
     });
   } else {
-    res.render("dashboard", { user: { name: "Kidus" } });
+    const oldUser = await User.findOne({ where: { username } });
+
+    if (oldUser) {
+      errors.push({ msg: "Username already exists" });
+      res.render("register", {
+        errors,
+        first_name,
+        last_name,
+        username,
+        password,
+        password2,
+      });
+    } else {
+      const user = await User.create({
+        first_name,
+        last_name,
+        username,
+        password: hashPassword(password),
+        user_role: "admin",
+      });
+
+      res.render("dashboard", { user });
+    }
   }
 });
 
