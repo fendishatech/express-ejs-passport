@@ -1,6 +1,8 @@
 const path = require("path");
 const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
+const flash = require("connect-flash");
+const session = require("express-session");
 // ROUTES
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
@@ -16,6 +18,22 @@ app.set("views", path.join(__dirname, "./views"));
 app.set("view engine", "ejs");
 app.set("layout", "layout");
 app.use(express.urlencoded({ extended: false }));
+// session
+app.use(
+  session({
+    secret: "keyboard cat",
+    resave: true,
+    saveUninitialized: true,
+    // cookie: { secure: true },
+  })
+);
+// connect flash
+app.use(flash());
+app.use((req, res, next) => {
+  res.locals.success_msg = req.flash("success_msg");
+  res.locals.error_msg = req.flash("error_msg");
+  next();
+});
 
 // ROUTES
 app.use("/", indexRouter);

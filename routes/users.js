@@ -71,7 +71,8 @@ router.post("/register", async (req, res) => {
         user_role: "admin",
       });
 
-      res.render("dashboard", { user });
+      req.flash("success_msg", "You have registered successfully");
+      res.redirect("/login");
     }
   }
 });
