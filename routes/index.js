@@ -1,7 +1,10 @@
 const router = require("express").Router();
 
 router.get("", (req, res) => {
-  res.send("Hello Routs");
+  res.render("welcome");
 });
 
+router.get("/dashboard", (req, res) => {
+  res.render("dashboard", { user: { name: "Kidus" } });
+});
 module.exports = router;
